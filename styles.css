@@ -1,70 +1,115 @@
+/* Define custom color properties (Variables) */
+:root {
+    --bg-color: #f4f7f6;
+    --card-bg: #ffffff;
+    --text-color: #333333;
+    --input-border: #e0e0e0;
+    --item-bg: #f9f9f9;
+    --item-border: #eeeeee;
+    --deadline-bg: #e2f0fe;
+    --deadline-text: #007bff;
+    --muted-text: #888888;
+}
+
+/* This theme overrides the variables when active */
+body.dark-theme {
+    --bg-color: #121212;
+    --card-bg: #1e1e1e;
+    --text-color: #e0e0e0;
+    --input-border: #444444;
+    --item-bg: #2a2a2a;
+    --item-border: #333333;
+    --deadline-bg: #1a365d;
+    --deadline-text: #3b82f6;
+    --muted-text: #aaaaaa;
+}
+
 /* Reset some default browser styles */
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    /* Smooth transition for theme swaps! */
+    transition: background-color 0.3s, color 0.3s, border-color 0.3s;
 }
 
 body {
-    background-color: #f4f7f6;
+    background-color: var(--bg-color);
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    padding: 20px; /* Prevents container from touching screen edges on mobile */
+    padding: 20px;
 }
 
 .app-container {
-    background-color: #ffffff;
+    background-color: var(--card-bg);
     padding: 30px;
     border-radius: 12px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
     width: 100%;
-    max-width: 520px; /* 1. INCREASED width to perfectly fit the date input side-by-side */
+    max-width: 520px;
+}
+
+/* Header styling */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
 }
 
 h1 {
-    color: #333;
+    color: var(--text-color);
     font-size: 24px;
-    margin-bottom: 20px;
-    text-align: center;
+}
+
+/* Theme Toggle button */
+#theme-toggle {
+    background: none;
+    border: 2px solid var(--input-border);
+    font-size: 18px;
+    cursor: pointer;
+    padding: 6px 10px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--item-bg);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+#theme-toggle:hover {
+    transform: scale(1.1);
 }
 
 .input-section {
     display: flex;
-    gap: 8px; /* Slightly smaller gap to save space */
+    gap: 8px;
     margin-bottom: 20px;
 }
 
-#task-input {
-    flex: 2; /* 2. Takes up twice as much horizontal space as the date box */
+#task-input, #task-deadline {
     padding: 10px 12px;
-    border: 2px solid #e0e0e0;
+    border: 2px solid var(--input-border);
     border-radius: 6px;
     font-size: 15px;
     outline: none;
-    transition: border-color 0.2s;
-    min-width: 0; /* Prevents input from breaking layout boundaries */
-}
-
-#task-input:focus {
-    border-color: #007bff;
-}
-
-#task-deadline {
-    flex: 1.2; /* 3. Sized perfectly to fit the calendar date and icon */
-    padding: 10px 12px;
-    border: 2px solid #e0e0e0;
-    border-radius: 6px;
-    font-size: 15px;
-    outline: none;
-    color: #666;
-    transition: border-color 0.2s;
+    background-color: var(--card-bg);
+    color: var(--text-color);
     min-width: 0;
 }
 
-#task-deadline:focus {
+#task-input {
+    flex: 2;
+}
+
+#task-deadline {
+    flex: 1.2;
+}
+
+#task-input:focus, #task-deadline:focus {
     border-color: #007bff;
 }
 
@@ -77,8 +122,7 @@ h1 {
     font-size: 15px;
     cursor: pointer;
     font-weight: 600;
-    transition: background-color 0.2s;
-    white-space: nowrap; /* Keeps button text on one single line */
+    white-space: nowrap;
 }
 
 #add-btn:hover {
@@ -94,8 +138,8 @@ h1 {
     justify-content: space-between;
     align-items: center;
     padding: 12px;
-    background-color: #f9f9f9;
-    border: 1px solid #eee;
+    background-color: var(--item-bg);
+    border: 1px solid var(--item-border);
     border-radius: 6px;
     margin-bottom: 8px;
     gap: 10px;
@@ -103,33 +147,48 @@ h1 {
 
 .task-item span {
     font-size: 15px;
-    color: #333;
+    color: var(--text-color);
     cursor: pointer;
     display: flex;
-    align-items: center;
-    flex-wrap: wrap; /* Allows text and badge to wrap nicely if very long */
+    flex-direction: column; /* Stack details vertically under the task text */
+    align-items: flex-start;
+    gap: 4px;
     flex: 1;
 }
 
-.task-item.completed span {
-    text-decoration: line-through;
-    color: #aaa;
+/* Container for metadata tags (Created Date & Deadline) */
+.task-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
 }
 
+/* Styling for Created Date text */
+.created-date-tag {
+    font-size: 11px;
+    color: var(--muted-text);
+}
+
+/* Deadline tag styling */
 .task-deadline-tag {
     font-size: 11px;
-    background-color: #e2f0fe;
-    color: #007bff;
-    padding: 3px 6px;
+    background-color: var(--deadline-bg);
+    color: var(--deadline-text);
+    padding: 2px 6px;
     border-radius: 4px;
-    margin-left: 10px;
     font-weight: bold;
     white-space: nowrap;
 }
 
+.task-item.completed span {
+    text-decoration: line-through;
+    color: var(--muted-text);
+}
+
 .task-item.completed .task-deadline-tag {
-    background-color: #eee;
-    color: #aaa;
+    background-color: var(--item-border);
+    color: var(--muted-text);
 }
 
 .delete-btn {
@@ -147,7 +206,7 @@ h1 {
     background-color: #e60000;
 }
 
-/* 4. MOBILE-FRIENDLY RESPONSIVENESS: Stacks inputs vertically on mobile phones */
+/* Mobile-friendly stack configuration */
 @media (max-width: 480px) {
     .input-section {
         flex-direction: column;

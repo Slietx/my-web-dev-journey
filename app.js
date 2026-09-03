@@ -3,9 +3,26 @@ const taskInput = document.getElementById('task-input');
 const taskDeadline = document.getElementById('task-deadline');
 const addBtn = document.getElementById('add-btn');
 const taskList = document.getElementById('task-list');
+const themeToggle = document.getElementById('theme-toggle');
 
-// 2. Load tasks from localStorage (or start with an empty array if none exist)
+// 2. Load saved tasks and theme preference from localStorage
 let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+const savedTheme = localStorage.getItem('theme');
+
+// Apply saved theme on page load
+if (savedTheme === 'dark') {
+    document.body.classList.add('dark-theme');
+    themeToggle.textContent = '☀️'; // Switch toggle symbol to Sun
+} else {
+    themeToggle.textContent = '🌙'; // Keep toggle symbol as Moon
+}
+
+// Set up the theme toggle click behavior
+themeToggle.addEventListener('click', () => {
+    const isDark = document.body.classList.toggle('dark-theme');
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    themeToggle.textContent = isDark ? '☀️' : '🌙';
+});
 
 // 3. Function to save the tasks array to localStorage
 function saveTasks() {
@@ -28,19 +45,37 @@ function renderTasks() {
 
         // Create a <span> to hold the task's text
         const span = document.createElement('span');
-        span.textContent = task.text;
+        
+        // Add the main task text node
+        const textNode = document.createTextNode(task.text);
+        span.appendChild(textNode);
 
-        // If the task has a deadline, build and attach the badge
+        // Create a horizontal container for metadata badges
+        const metaContainer = document.createElement('div');
+        metaContainer.className = 'task-meta';
+
+        // A) Create the 'Created Date' tag
+        const createdTag = document.createElement('span');
+        createdTag.className = 'created-date-tag';
+        // Provide a fallback date if checking old tasks created before this feature
+        const dateToShow = task.createdDate || 'Added: Previously';
+        createdTag.textContent = `Added: ${dateToShow}`;
+        metaContainer.appendChild(createdTag);
+
+        // B) Create the 'Deadline' tag if one exists
         if (task.deadline) {
             const deadlineTag = document.createElement('span');
             deadlineTag.className = 'task-deadline-tag';
             deadlineTag.textContent = `Due: ${task.deadline}`;
-            span.appendChild(deadlineTag);
+            metaContainer.appendChild(deadlineTag);
         }
+
+        // Put our meta tags under the main task text
+        span.appendChild(metaContainer);
 
         // When the user clicks the task text, toggle the completed state
         span.addEventListener('click', () => {
-            tasks[index].completed = !tasks[index].completed; // Switch true to false, or false to true
+            tasks[index].completed = !tasks[index].completed;
             saveTasks();
             renderTasks(); // Redraw the updated list
         });
@@ -52,7 +87,7 @@ function renderTasks() {
 
         // When the user clicks 'Delete', remove the task from our array
         deleteBtn.addEventListener('click', () => {
-            tasks.splice(index, 1); // Remove 1 item at the current position
+            tasks.splice(index, 1);
             saveTasks();
             renderTasks(); // Redraw the updated list
         });
@@ -75,10 +110,19 @@ function addTask() {
         return;
     }
 
-    // Create a new task object
+    // Capture current date in a short human-readable layout (e.g., "Sep 3, 2026")
+    const today = new Date();
+    const formattedCreatedDate = today.toLocaleDateString(undefined, { 
+        month: 'short', 
+        day: 'numeric',
+        year: 'numeric'
+    });
+
+    // Create a new task object with our new createdDate property!
     const newTask = {
         text: taskText,
         deadline: deadlineText,
+        createdDate: formattedCreatedDate,
         completed: false
     };
 
