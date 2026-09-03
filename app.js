@@ -1,12 +1,14 @@
 // 1. Select the HTML elements we need to interact with
 const taskInput = document.getElementById('task-input');
+const taskDeadline = document.getElementById('task-deadline');
 const addBtn = document.getElementById('add-btn');
 const taskList = document.getElementById('task-list');
 
 // 2. Define the function that adds a new task
 function addTask() {
     const taskText = taskInput.value.trim();
-    
+    const deadlineText = taskDeadline.value; // Retrieve the date value
+
     // Check if the input is empty
     if (taskText === '') {
         alert('Please enter a task first!');
@@ -26,6 +28,16 @@ function addTask() {
         li.classList.toggle('completed');
     });
 
+    // If the user picked a deadline, create the deadline badge and attach it
+    if (deadlineText) {
+        const deadlineTag = document.createElement('span');
+        deadlineTag.className = 'task-deadline-tag';
+        
+        // Format the date to look nicer
+        deadlineTag.textContent = `Due: ${deadlineText}`;
+        span.appendChild(deadlineTag);
+    }
+
     // Create the 'Delete' button
     const deleteBtn = document.createElement('button');
     deleteBtn.className = 'delete-btn';
@@ -43,8 +55,9 @@ function addTask() {
     // Put our completed list item into the <ul> list on the page
     taskList.appendChild(li);
 
-    // Clear the input box and put the cursor back inside it
+    // Clear the input boxes and put the cursor back inside the text input
     taskInput.value = '';
+    taskDeadline.value = ''; // Clear the date picker
     taskInput.focus();
 }
 
@@ -56,4 +69,4 @@ taskInput.addEventListener('keypress', (event) => {
     if (event.key === 'Enter') {
         addTask();
     }
-});console.log('App Initialized');
+});
