@@ -4,10 +4,70 @@ const taskDeadline = document.getElementById('task-deadline');
 const addBtn = document.getElementById('add-btn');
 const taskList = document.getElementById('task-list');
 
-// 2. Define the function that adds a new task
+// 2. Load tasks from localStorage (or start with an empty array if none exist)
+let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+
+// 3. Function to save the tasks array to localStorage
+function saveTasks() {
+    localStorage.setItem('tasks', JSON.stringify(tasks));
+}
+
+// 4. Function to render (draw) the tasks on the screen
+function renderTasks() {
+    // Clear the current list in HTML so we don't get duplicates
+    taskList.innerHTML = '';
+
+    // Loop through our tasks array and build the HTML for each task
+    tasks.forEach((task, index) => {
+        // Create the <li> element
+        const li = document.createElement('li');
+        li.className = 'task-item';
+        if (task.completed) {
+            li.classList.add('completed');
+        }
+
+        // Create a <span> to hold the task's text
+        const span = document.createElement('span');
+        span.textContent = task.text;
+
+        // If the task has a deadline, build and attach the badge
+        if (task.deadline) {
+            const deadlineTag = document.createElement('span');
+            deadlineTag.className = 'task-deadline-tag';
+            deadlineTag.textContent = `Due: ${task.deadline}`;
+            span.appendChild(deadlineTag);
+        }
+
+        // When the user clicks the task text, toggle the completed state
+        span.addEventListener('click', () => {
+            tasks[index].completed = !tasks[index].completed; // Switch true to false, or false to true
+            saveTasks();
+            renderTasks(); // Redraw the updated list
+        });
+
+        // Create the 'Delete' button
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'delete-btn';
+        deleteBtn.textContent = 'Delete';
+
+        // When the user clicks 'Delete', remove the task from our array
+        deleteBtn.addEventListener('click', () => {
+            tasks.splice(index, 1); // Remove 1 item at the current position
+            saveTasks();
+            renderTasks(); // Redraw the updated list
+        });
+
+        // Assemble the list item and insert it into the <ul>
+        li.appendChild(span);
+        li.appendChild(deleteBtn);
+        taskList.appendChild(li);
+    });
+}
+
+// 5. Define the function to add a new task
 function addTask() {
     const taskText = taskInput.value.trim();
-    const deadlineText = taskDeadline.value; // Retrieve the date value
+    const deadlineText = taskDeadline.value;
 
     // Check if the input is empty
     if (taskText === '') {
@@ -15,58 +75,34 @@ function addTask() {
         return;
     }
 
-    // Create the <li> element that holds our task
-    const li = document.createElement('li');
-    li.className = 'task-item';
+    // Create a new task object
+    const newTask = {
+        text: taskText,
+        deadline: deadlineText,
+        completed: false
+    };
 
-    // Create a <span> to hold the task's text
-    const span = document.createElement('span');
-    span.textContent = taskText;
+    // Add our new task object to the array
+    tasks.push(newTask);
 
-    // When the user clicks the task text, toggle the 'completed' line-through style
-    span.addEventListener('click', () => {
-        li.classList.toggle('completed');
-    });
+    // Save to localStorage and redraw the list
+    saveTasks();
+    renderTasks();
 
-    // If the user picked a deadline, create the deadline badge and attach it
-    if (deadlineText) {
-        const deadlineTag = document.createElement('span');
-        deadlineTag.className = 'task-deadline-tag';
-        
-        // Format the date to look nicer
-        deadlineTag.textContent = `Due: ${deadlineText}`;
-        span.appendChild(deadlineTag);
-    }
-
-    // Create the 'Delete' button
-    const deleteBtn = document.createElement('button');
-    deleteBtn.className = 'delete-btn';
-    deleteBtn.textContent = 'Delete';
-
-    // When the user clicks 'Delete', remove the entire list item
-    deleteBtn.addEventListener('click', () => {
-        taskList.removeChild(li);
-    });
-
-    // Put the text and the delete button inside our list item
-    li.appendChild(span);
-    li.appendChild(deleteBtn);
-
-    // Put our completed list item into the <ul> list on the page
-    taskList.appendChild(li);
-
-    // Clear the input boxes and put the cursor back inside the text input
+    // Clear the input fields and return focus to the text input
     taskInput.value = '';
-    taskDeadline.value = ''; // Clear the date picker
+    taskDeadline.value = '';
     taskInput.focus();
 }
 
-// 3. Listen for the click event on the "Add Task" button
+// 6. Set up event listeners for user interactions
 addBtn.addEventListener('click', addTask);
 
-// 4. Also listen for the "Enter" key being pressed inside the input field
 taskInput.addEventListener('keypress', (event) => {
     if (event.key === 'Enter') {
         addTask();
     }
 });
+
+// 7. Render tasks automatically when the page first loads
+renderTasks();
