@@ -9,6 +9,8 @@
     --deadline-bg: #e2f0fe;
     --deadline-text: #007bff;
     --muted-text: #888888;
+    --progress-bar-empty: #e9ecef;
+    --progress-bar-fill: #28a745; /* Green for success */
 }
 
 /* This theme overrides the variables when active */
@@ -22,6 +24,8 @@ body.dark-theme {
     --deadline-bg: #1a365d;
     --deadline-text: #3b82f6;
     --muted-text: #aaaaaa;
+    --progress-bar-empty: #333333;
+    --progress-bar-fill: #2ed573; /* Brighter green for dark mode contrast */
 }
 
 /* Reset some default browser styles */
@@ -57,7 +61,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
 }
 
 h1 {
@@ -82,6 +86,34 @@ h1 {
 
 #theme-toggle:hover {
     transform: scale(1.1);
+}
+
+/* NEW: Progress Section Styling */
+.progress-section {
+    margin-bottom: 20px;
+}
+
+#progress-text {
+    font-size: 13px;
+    color: var(--muted-text);
+    font-weight: 600;
+    display: block;
+    margin-bottom: 6px;
+}
+
+.progress-bar-bg {
+    background-color: var(--progress-bar-empty);
+    height: 10px;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+#progress-bar-fill {
+    background-color: var(--progress-bar-fill);
+    height: 100%;
+    width: 0%; /* Dynamic width controlled by JS */
+    border-radius: 5px;
+    transition: width 0.4s ease-out; /* Smooth slide animation! */
 }
 
 .input-section {
@@ -129,6 +161,36 @@ h1 {
     background-color: #0056b3;
 }
 
+/* NEW: Filter Section Row */
+.filter-section {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 15px;
+    justify-content: flex-start;
+}
+
+.filter-btn {
+    background-color: var(--item-bg);
+    color: var(--text-color);
+    border: 1px solid var(--item-border);
+    padding: 6px 14px;
+    border-radius: 20px; /* Pill shape */
+    font-size: 13px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+.filter-btn:hover {
+    border-color: #007bff;
+}
+
+.filter-btn.active {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
 #task-list {
     list-style: none;
 }
@@ -150,13 +212,12 @@ h1 {
     color: var(--text-color);
     cursor: pointer;
     display: flex;
-    flex-direction: column; /* Stack details vertically under the task text */
+    flex-direction: column;
     align-items: flex-start;
     gap: 4px;
     flex: 1;
 }
 
-/* Container for metadata tags (Created Date & Deadline) */
 .task-meta {
     display: flex;
     flex-wrap: wrap;
@@ -164,13 +225,11 @@ h1 {
     align-items: center;
 }
 
-/* Styling for Created Date text */
 .created-date-tag {
     font-size: 11px;
     color: var(--muted-text);
 }
 
-/* Deadline tag styling */
 .task-deadline-tag {
     font-size: 11px;
     background-color: var(--deadline-bg);
@@ -206,7 +265,7 @@ h1 {
     background-color: #e60000;
 }
 
-/* Mobile-friendly stack configuration */
+/* Mobile responsive stack */
 @media (max-width: 480px) {
     .input-section {
         flex-direction: column;

@@ -9,10 +9,18 @@
 </head>
 <body>
     <div class="app-container">
-        <!-- New Header section holding our Title and Toggle Button -->
+        <!-- Header section holding Title and Toggle Button -->
         <div class="header">
             <h1>My Personal Task Tracker</h1>
             <button id="theme-toggle" aria-label="Toggle Dark Mode">🌙</button>
+        </div>
+
+        <!-- NEW: Progress Bar Section -->
+        <div class="progress-section">
+            <span id="progress-text">0 of 0 tasks completed</span>
+            <div class="progress-bar-bg">
+                <div id="progress-bar-fill"></div>
+            </div>
         </div>
         
         <!-- Input section for adding new tasks -->
@@ -20,6 +28,13 @@
             <input type="text" id="task-input" placeholder="What needs to be done?">
             <input type="date" id="task-deadline">
             <button id="add-btn">Add Task</button>
+        </div>
+
+        <!-- NEW: Task Filters Row -->
+        <div class="filter-section">
+            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="active">Active</button>
+            <button class="filter-btn" data-filter="completed">Completed</button>
         </div>
 
         <!-- The list where tasks will dynamically appear -->

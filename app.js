@@ -5,16 +5,22 @@ const addBtn = document.getElementById('add-btn');
 const taskList = document.getElementById('task-list');
 const themeToggle = document.getElementById('theme-toggle');
 
+// Selecting New Elements for Progress and Filters
+const progressText = document.getElementById('progress-text');
+const progressBarFill = document.getElementById('progress-bar-fill');
+const filterBtns = document.querySelectorAll('.filter-btn');
+
 // 2. Load saved tasks and theme preference from localStorage
 let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
 const savedTheme = localStorage.getItem('theme');
+let currentFilter = 'all'; // Default active filter
 
 // Apply saved theme on page load
 if (savedTheme === 'dark') {
     document.body.classList.add('dark-theme');
-    themeToggle.textContent = '☀️'; // Switch toggle symbol to Sun
+    themeToggle.textContent = '☀️';
 } else {
-    themeToggle.textContent = '🌙'; // Keep toggle symbol as Moon
+    themeToggle.textContent = '🌙';
 }
 
 // Set up the theme toggle click behavior
@@ -29,13 +35,39 @@ function saveTasks() {
     localStorage.setItem('tasks', JSON.stringify(tasks));
 }
 
+// NEW FUNCTION: Calculate stats and update progress bar
+function updateProgressBar() {
+    const totalTasks = tasks.length;
+    const completedTasks = tasks.filter(task => task.completed).length;
+    
+    // Update text counter
+    if (totalTasks === 0) {
+        progressText.textContent = "No tasks yet! Add one below.";
+        progressBarFill.style.width = '0%';
+    } else {
+        const percentage = Math.round((completedTasks / totalTasks) * 100);
+        progressText.textContent = `${completedTasks} of ${totalTasks} tasks completed (${percentage}%)`;
+        progressBarFill.style.width = `${percentage}%`;
+    }
+}
+
 // 4. Function to render (draw) the tasks on the screen
 function renderTasks() {
-    // Clear the current list in HTML so we don't get duplicates
+    // A) Clear the current list in HTML so we don't get duplicates
     taskList.innerHTML = '';
 
-    // Loop through our tasks array and build the HTML for each task
-    tasks.forEach((task, index) => {
+    // B) Calculate the overall stats BEFORE we filter the visual view
+    updateProgressBar();
+
+    // C) Filter our tasks based on the active button
+    const filteredTasks = tasks.filter(task => {
+        if (currentFilter === 'active') return !task.completed;
+        if (currentFilter === 'completed') return task.completed;
+        return true; // 'all'
+    });
+
+    // D) Loop through our filtered array and build the HTML for each task
+    filteredTasks.forEach((task) => {
         // Create the <li> element
         const li = document.createElement('li');
         li.className = 'task-item';
@@ -54,15 +86,14 @@ function renderTasks() {
         const metaContainer = document.createElement('div');
         metaContainer.className = 'task-meta';
 
-        // A) Create the 'Created Date' tag
+        // Create the 'Created Date' tag
         const createdTag = document.createElement('span');
         createdTag.className = 'created-date-tag';
-        // Provide a fallback date if checking old tasks created before this feature
         const dateToShow = task.createdDate || 'Added: Previously';
         createdTag.textContent = `Added: ${dateToShow}`;
         metaContainer.appendChild(createdTag);
 
-        // B) Create the 'Deadline' tag if one exists
+        // Create the 'Deadline' tag if one exists
         if (task.deadline) {
             const deadlineTag = document.createElement('span');
             deadlineTag.className = 'task-deadline-tag';
@@ -73,11 +104,11 @@ function renderTasks() {
         // Put our meta tags under the main task text
         span.appendChild(metaContainer);
 
-        // When the user clicks the task text, toggle the completed state
+        // When clicked, toggle the completed status
         span.addEventListener('click', () => {
-            tasks[index].completed = !tasks[index].completed;
+            task.completed = !task.completed;
             saveTasks();
-            renderTasks(); // Redraw the updated list
+            renderTasks(); // Redraw
         });
 
         // Create the 'Delete' button
@@ -85,11 +116,14 @@ function renderTasks() {
         deleteBtn.className = 'delete-btn';
         deleteBtn.textContent = 'Delete';
 
-        // When the user clicks 'Delete', remove the task from our array
+        // When clicked, delete by finding the actual object in our original tasks array
         deleteBtn.addEventListener('click', () => {
-            tasks.splice(index, 1);
-            saveTasks();
-            renderTasks(); // Redraw the updated list
+            const originalIndex = tasks.indexOf(task);
+            if (originalIndex > -1) {
+                tasks.splice(originalIndex, 1);
+                saveTasks();
+                renderTasks(); // Redraw
+            }
         });
 
         // Assemble the list item and insert it into the <ul>
@@ -104,13 +138,11 @@ function addTask() {
     const taskText = taskInput.value.trim();
     const deadlineText = taskDeadline.value;
 
-    // Check if the input is empty
     if (taskText === '') {
         alert('Please enter a task first!');
         return;
     }
 
-    // Capture current date in a short human-readable layout (e.g., "Sep 3, 2026")
     const today = new Date();
     const formattedCreatedDate = today.toLocaleDateString(undefined, { 
         month: 'short', 
@@ -118,7 +150,6 @@ function addTask() {
         year: 'numeric'
     });
 
-    // Create a new task object with our new createdDate property!
     const newTask = {
         text: taskText,
         deadline: deadlineText,
@@ -126,14 +157,11 @@ function addTask() {
         completed: false
     };
 
-    // Add our new task object to the array
     tasks.push(newTask);
-
-    // Save to localStorage and redraw the list
     saveTasks();
     renderTasks();
 
-    // Clear the input fields and return focus to the text input
+    // Clear input fields
     taskInput.value = '';
     taskDeadline.value = '';
     taskInput.focus();
@@ -146,6 +174,21 @@ taskInput.addEventListener('keypress', (event) => {
     if (event.key === 'Enter') {
         addTask();
     }
+});
+
+// NEW: Event Listeners for Filter Buttons
+filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+        // Remove 'active' class from all buttons
+        filterBtns.forEach(b => b.classList.remove('active'));
+        
+        // Add 'active' class to the clicked button
+        btn.classList.add('active');
+        
+        // Set the active filter and redraw the tasks
+        currentFilter = btn.getAttribute('data-filter');
+        renderTasks();
+    });
 });
 
 // 7. Render tasks automatically when the page first loads
